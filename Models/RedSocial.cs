@@ -8,7 +8,7 @@ namespace VisionNaranja.Models;
 
 [Index("EmprendimientoId", "EsPrincipal", Name = "IX_RS_Principal")]
 [Index("EmprendimientoId", "Plataforma", Name = "UQ_RedesSociales_Plataforma", IsUnique = true)]
-public partial class RedesSociale
+public partial class RedSocial
 {
     [Key]
     public int RedSocialId { get; set; }

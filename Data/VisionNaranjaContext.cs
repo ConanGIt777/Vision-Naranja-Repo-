@@ -18,9 +18,9 @@ public partial class VisionNaranjaContext : DbContext
 
     public virtual DbSet<Categoria> Categorias { get; set; }
 
-    public virtual DbSet<Ciudade> Ciudades { get; set; }
+    public virtual DbSet<Ciudad> Ciudades { get; set; }
 
-    public virtual DbSet<Emprendedore> Emprendedores { get; set; }
+    public virtual DbSet<Emprendedor> Emprendedores { get; set; }
 
     public virtual DbSet<Emprendimiento> Emprendimientos { get; set; }
 
@@ -28,26 +28,22 @@ public partial class VisionNaranjaContext : DbContext
 
     public virtual DbSet<ProductosServicio> ProductosServicios { get; set; }
 
-    public virtual DbSet<RedesSociale> RedesSociales { get; set; }
+    public virtual DbSet<RedSocial> RedesSociales { get; set; }
 
     public virtual DbSet<VAdminProductosServicio> VAdminProductosServicios { get; set; }
 
     public virtual DbSet<VCatalogo> VCatalogos { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DESKTOP-J22FVAB;Database=VisionNaranja;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Modern_Spanish_CI_AI");
 
-        modelBuilder.Entity<Ciudade>(entity =>
+        modelBuilder.Entity<Ciudad>(entity =>
         {
             entity.Property(e => e.Pais).HasDefaultValue("Ecuador", "DF_Ciudades_Pais");
         });
 
-        modelBuilder.Entity<Emprendedore>(entity =>
+        modelBuilder.Entity<Emprendedor>(entity =>
         {
             entity.Property(e => e.Activo).HasDefaultValue(true, "DF_Emprendedores_Activo");
             entity.Property(e => e.FechaRegistro).HasDefaultValueSql("(sysdatetime())", "DF_Emprendedores_Fecha");
@@ -89,7 +85,7 @@ public partial class VisionNaranjaContext : DbContext
                 .HasConstraintName("FK_PS_Emprendimiento");
         });
 
-        modelBuilder.Entity<RedesSociale>(entity =>
+        modelBuilder.Entity<RedSocial>(entity =>
         {
             entity.HasOne(d => d.Emprendimiento).WithMany(p => p.RedesSociales).HasConstraintName("FK_RedesSociales_Emprendimiento");
         });

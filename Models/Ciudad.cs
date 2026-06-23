@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace VisionNaranja.Models;
 
 [Index("Nombre", "Provincia", Name = "UQ_Ciudades_Nombre", IsUnique = true)]
-public partial class Ciudade
+public partial class Ciudad
 {
     [Key]
     public int CiudadId { get; set; }

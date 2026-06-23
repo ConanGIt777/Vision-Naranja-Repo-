@@ -1,0 +1,50 @@
+@page
+@model VisionNaranja.Pages.Catalogo.IndexModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Catálogo de Emprendimientos";
+}
+
+<h1>Visión Naranja — Catálogo</h1>
+
+<form method="get">
+    <select name="Categoria" asp-items="@(new SelectList(Model.Categorias, "Nombre", "Nombre"))">
+        <option value="">Todas las categorías</option>
+    </select>
+
+    <select name="CiudadId" asp-items="@(new SelectList(Model.Ciudades, "CiudadId", "Nombre"))">
+        <option value="">Todas las ciudades</option>
+    </select>
+
+    <select name="TipoOferta">
+        <option value="">Producto y servicio</option>
+        <option value="Producto">Solo productos</option>
+        <option value="Servicio">Solo servicios</option>
+    </select>
+
+    <input type="text" name="Termino" placeholder="Buscar..." value="@Model.Termino" />
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<hr />
+
+@if (!Model.Items.Any())
+{
+    <p>No se encontraron resultados.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in Model.Items)
+        {
+            <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; display:inline-block; width:250px;">
+                <h3>@item.NombreProductoServicio</h3>
+                <p><strong>@item.NombreEmprendimiento</strong> — @item.Ciudad</p>
+                <p>@item.Categoria | @item.TipoOferta</p>
+                <p>@(item.Precio.HasValue ? item.Precio.Value.ToString("C") : "Precio a consultar")</p>
+                <a asp-page="/Catalogo/Detalle" asp-route-id="@item.EmprendimientoId">Ver emprendimiento</a>
+            </div>
+        }
+    </div>
+}

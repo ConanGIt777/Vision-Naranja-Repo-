@@ -1,0 +1,95 @@
+@page "{id:int}"
+@model VisionNaranja.Pages.Catalogo.DetalleModel
+@{
+    ViewData["Title"] = Model.Emprendimiento?.NombreMarca ?? "Detalle";
+}
+
+@if (Model.Emprendimiento is null)
+{
+    <p>No se encontró el emprendimiento solicitado.</p>
+}
+else
+{
+    var e = Model.Emprendimiento;
+
+    <h1>@e.NombreMarca</h1>
+    <p>@e.Descripcion</p>
+    <p><strong>Ciudad:</strong> @e.Ciudad, @e.Provincia</p>
+    <p><strong>Emprendedor:</strong> @e.NombreCompleto</p>
+
+    <h3>Información de contacto y logística</h3>
+    <ul>
+        <li><strong>Correo:</strong> @e.CorreoElectronico</li>
+        @if (!string.IsNullOrWhiteSpace(e.Telefono))
+        {
+            <li><strong>Teléfono:</strong> @e.Telefono</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(e.SitioWeb))
+        {
+            <li><strong>Sitio web:</strong> <a href="@e.SitioWeb" target="_blank">@e.SitioWeb</a></li>
+        }
+        @if (!string.IsNullOrWhiteSpace(e.MediosDePago))
+        {
+            <li><strong>Medios de pago:</strong> @e.MediosDePago</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(e.ZonaDeDespacho))
+        {
+            <li><strong>Zona de despacho:</strong> @e.ZonaDeDespacho</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(e.TiempoDeEntrega))
+        {
+            <li><strong>Tiempo de entrega:</strong> @e.TiempoDeEntrega</li>
+        }
+        @if (!string.IsNullOrWhiteSpace(e.Certificaciones))
+        {
+            <li><strong>Certificaciones:</strong> @e.Certificaciones</li>
+        }
+    </ul>
+
+    @if (e.RedesSociales.Any())
+    {
+        <h3>Redes sociales</h3>
+        <ul>
+            @foreach (var red in e.RedesSociales)
+            {
+                <li>
+                    <strong>@red.Plataforma:</strong>
+                    @if (!string.IsNullOrWhiteSpace(red.UrlPerfil))
+                    {
+                        <a href="@red.UrlPerfil" target="_blank">@red.Usuario</a>
+                    }
+                    else
+                    {
+                        @red.Usuario
+                    }
+                    @if (red.EsPrincipal)
+                    {
+                        <span> (principal)</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    <h3>Productos y servicios</h3>
+    @if (!e.Productos.Any())
+    {
+        <p>Este emprendimiento aún no tiene productos o servicios disponibles.</p>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var p in e.Productos)
+            {
+                <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; display:inline-block; width:250px;">
+                    <h4>@p.Nombre</h4>
+                    <p>@p.Categoria | @p.TipoOferta</p>
+                    <p>@p.Descripcion</p>
+                    <p>@(p.Precio.HasValue ? p.Precio.Value.ToString("C") : "Precio a consultar")</p>
+                </div>
+            }
+        </div>
+    }
+
+    <p><a asp-page="/Catalogo/Index">← Volver al catálogo</a></p>
+}

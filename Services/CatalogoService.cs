@@ -1,0 +1,150 @@
+using Microsoft.EntityFrameworkCore;
+using VisionNaranja.Data;
+using VisionNaranja.Models;
+using Microsoft.Data.SqlClient;
+using VisionNaranja.Models.ViewModels;
+
+namespace VisionNaranja.Services
+{
+    public class CatalogoService
+    {
+        private readonly VisionNaranjaContext _context;
+
+        public CatalogoService(VisionNaranjaContext context)
+        {
+            _context = context;
+        }
+
+        // Lista todo el catálogo público, con filtros opcionales
+        public async Task<List<VCatalogo>> ObtenerCatalogoAsync(
+    string? categoria = null,
+    int? ciudadId = null,
+    string? tipoOferta = null,
+    string? termino = null)
+{
+    var query = _context.VCatalogos.AsQueryable();
+
+    if (!string.IsNullOrWhiteSpace(categoria))
+        query = query.Where(v => v.Categoria == categoria);
+
+    if (ciudadId.HasValue)
+        query = query.Where(v => v.CiudadId == ciudadId.Value);
+
+    if (!string.IsNullOrWhiteSpace(tipoOferta))
+        query = query.Where(v => v.TipoOferta == tipoOferta);
+
+    if (!string.IsNullOrWhiteSpace(termino))
+        query = query.Where(v =>
+            v.NombreProductoServicio.Contains(termino) ||
+            v.NombreEmprendimiento.Contains(termino) ||
+            v.Categoria.Contains(termino) ||
+            v.Ciudad.Contains(termino));
+
+    return await query
+        .OrderBy(v => v.NombreEmprendimiento)
+        .ToListAsync();
+}
+
+        // Listas para llenar los <select> de filtros (categorías y ciudades)
+        public async Task<List<Categoria>> ObtenerCategoriasAsync()
+        {
+            return await _context.Categorias.OrderBy(c => c.Nombre).ToListAsync();
+        }
+
+        public async Task<List<Ciudad>> ObtenerCiudadesAsync()
+        {
+            return await _context.Ciudades.OrderBy(c => c.Nombre).ToListAsync();
+        }
+        public async Task<EmprendimientoDetalleViewModel?> ObtenerDetalleEmprendimientoAsync(int emprendimientoId)
+{
+    EmprendimientoDetalleViewModel? detalle = null;
+
+    var connection = _context.Database.GetDbConnection();
+    await using var command = connection.CreateCommand();
+    command.CommandText = "sp_ObtenerEmprendimiento";
+    command.CommandType = System.Data.CommandType.StoredProcedure;
+    command.Parameters.Add(new SqlParameter("@EmprendimientoId", emprendimientoId));
+
+    var abrioConexion = false;
+    if (connection.State != System.Data.ConnectionState.Open)
+    {
+        await connection.OpenAsync();
+        abrioConexion = true;
+    }
+
+    try
+    {
+        await using var reader = await command.ExecuteReaderAsync();
+
+        // Result set 1: datos del emprendimiento
+        if (await reader.ReadAsync())
+        {
+            detalle = new EmprendimientoDetalleViewModel
+            {
+                EmprendimientoId = reader.GetInt32(reader.GetOrdinal("EmprendimientoId")),
+                NombreMarca = reader.GetString(reader.GetOrdinal("NombreMarca")),
+                Descripcion = reader.GetString(reader.GetOrdinal("Descripcion")),
+                SitioWeb = reader["SitioWeb"] as string,
+                MediosDePago = reader["MediosDePago"] as string,
+                ZonaDeDespacho = reader["ZonaDeDespacho"] as string,
+                TiempoDeEntrega = reader["TiempoDeEntrega"] as string,
+                Certificaciones = reader["Certificaciones"] as string,
+                EnlaceDriveFotos = reader["EnlaceDriveFotos"] as string,
+                FechaRegistro = reader.GetDateTime(reader.GetOrdinal("FechaRegistro")),
+                Activo = reader.GetBoolean(reader.GetOrdinal("Activo")),
+                EmprendedorId = reader.GetInt32(reader.GetOrdinal("EmprendedorId")),
+                NombreCompleto = reader.GetString(reader.GetOrdinal("NombreCompleto")),
+                CorreoElectronico = reader.GetString(reader.GetOrdinal("CorreoElectronico")),
+                Telefono = reader["Telefono"] as string,
+                CiudadId = reader.GetInt32(reader.GetOrdinal("CiudadId")),
+                Ciudad = reader.GetString(reader.GetOrdinal("Ciudad")),
+                Provincia = reader["Provincia"] as string,
+                Pais = reader.GetString(reader.GetOrdinal("Pais"))
+            };
+        }
+
+        if (detalle is null)
+            return null; // No existe ese EmprendimientoId
+
+        // Result set 2: redes sociales
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
+            detalle.RedesSociales.Add(new RedSocialViewModel
+            {
+                RedSocialId = reader.GetInt32(reader.GetOrdinal("RedSocialId")),
+                Plataforma = reader.GetString(reader.GetOrdinal("Plataforma")),
+                Usuario = reader.GetString(reader.GetOrdinal("Usuario")),
+                UrlPerfil = reader["UrlPerfil"] as string,
+                EsPrincipal = reader.GetBoolean(reader.GetOrdinal("EsPrincipal"))
+            });
+        }
+
+        // Result set 3: productos y servicios
+        await reader.NextResultAsync();
+        while (await reader.ReadAsync())
+        {
+            detalle.Productos.Add(new ProductoServicioViewModel
+            {
+                ProductoServicioId = reader.GetInt32(reader.GetOrdinal("ProductoServicioId")),
+                Nombre = reader.GetString(reader.GetOrdinal("Nombre")),
+                TipoOferta = reader.GetString(reader.GetOrdinal("TipoOferta")),
+                Categoria = reader.GetString(reader.GetOrdinal("Categoria")),
+                Descripcion = reader["Descripcion"] as string,
+                Precio = reader["Precio"] as decimal?,
+                Disponible = reader.GetBoolean(reader.GetOrdinal("Disponible")),
+                FechaRegistro = reader.GetDateTime(reader.GetOrdinal("FechaRegistro"))
+            });
+        }
+    }
+    finally
+    {
+        if (abrioConexion)
+            await connection.CloseAsync();
+    }
+
+    return detalle;
+}
+    }
+    
+}

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace VisionNaranja.Models;
 
 [Index("CorreoElectronico", Name = "UQ_Emprendedores_Correo", IsUnique = true)]
-public partial class Emprendedore
+public partial class Emprendedor
 {
     [Key]
     public int EmprendedorId { get; set; }

@@ -46,15 +46,15 @@ public partial class Emprendimiento
 
     [ForeignKey("CiudadId")]
     [InverseProperty("Emprendimientos")]
-    public virtual Ciudade Ciudad { get; set; } = null!;
+    public virtual Ciudad Ciudad { get; set; } = null!;
 
     [ForeignKey("EmprendedorId")]
     [InverseProperty("Emprendimientos")]
-    public virtual Emprendedore Emprendedor { get; set; } = null!;
+    public virtual Emprendedor Emprendedor { get; set; } = null!;
 
     [InverseProperty("Emprendimiento")]
     public virtual ICollection<ProductosServicio> ProductosServicios { get; set; } = new List<ProductosServicio>();
 
     [InverseProperty("Emprendimiento")]
-    public virtual ICollection<RedesSociale> RedesSociales { get; set; } = new List<RedesSociale>();
+    public virtual ICollection<RedSocial> RedesSociales { get; set; } = new List<RedSocial>();
 }
