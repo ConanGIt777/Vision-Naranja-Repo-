@@ -40,9 +40,83 @@ namespace VisionNaranja.Services
             v.Categoria.Contains(termino) ||
             v.Ciudad.Contains(termino));
 
-    return await query
+    var items = await query
         .OrderBy(v => v.NombreEmprendimiento)
         .ToListAsync();
+
+    if (items.Count == 0)
+    {
+        var emprendimientos = await _context.Emprendimientos
+            .Where(e => e.Activo)
+            .Include(e => e.Emprendedor)
+            .Include(e => e.Ciudad)
+            .OrderByDescending(e => e.FechaRegistro)
+            .ToListAsync();
+
+        var fallbackItems = new List<VCatalogo>();
+
+        foreach (var emprendimiento in emprendimientos)
+        {
+            var productos = await _context.ProductosServicios
+                .Where(p => p.EmprendimientoId == emprendimiento.EmprendimientoId && p.Disponible)
+                .Include(p => p.Categoria)
+                .OrderBy(p => p.Nombre)
+                .ToListAsync();
+
+            if (productos.Count == 0)
+            {
+                fallbackItems.Add(new VCatalogo
+                {
+                    ProductoServicioId = 0,
+                    NombreProductoServicio = emprendimiento.NombreMarca,
+                    TipoOferta = "Producto",
+                    Categoria = "General",
+                    EmprendimientoId = emprendimiento.EmprendimientoId,
+                    NombreEmprendimiento = emprendimiento.NombreMarca,
+                    EmprendedorId = emprendimiento.EmprendedorId,
+                    NombreEmprendedor = emprendimiento.Emprendedor?.NombreCompleto ?? string.Empty,
+                    CiudadId = emprendimiento.CiudadId,
+                    Ciudad = emprendimiento.Ciudad?.Nombre ?? string.Empty,
+                    Provincia = emprendimiento.Ciudad?.Provincia,
+                    Descripcion = emprendimiento.Descripcion,
+                    CorreoElectronico = emprendimiento.Emprendedor?.CorreoElectronico ?? string.Empty,
+                    Telefono = emprendimiento.Emprendedor?.Telefono,
+                    FechaRegistro = emprendimiento.FechaRegistro
+                });
+                continue;
+            }
+
+            foreach (var producto in productos)
+            {
+                fallbackItems.Add(new VCatalogo
+                {
+                    ProductoServicioId = producto.ProductoServicioId,
+                    NombreProductoServicio = producto.Nombre,
+                    TipoOferta = producto.TipoOferta.ToString(),
+                    Categoria = producto.Categoria?.Nombre ?? "General",
+                    EmprendimientoId = emprendimiento.EmprendimientoId,
+                    NombreEmprendimiento = emprendimiento.NombreMarca,
+                    EmprendedorId = emprendimiento.EmprendedorId,
+                    NombreEmprendedor = emprendimiento.Emprendedor?.NombreCompleto ?? string.Empty,
+                    CiudadId = emprendimiento.CiudadId,
+                    Ciudad = emprendimiento.Ciudad?.Nombre ?? string.Empty,
+                    Provincia = emprendimiento.Ciudad?.Provincia,
+                    Descripcion = emprendimiento.Descripcion,
+                    CorreoElectronico = emprendimiento.Emprendedor?.CorreoElectronico ?? string.Empty,
+                    Telefono = emprendimiento.Emprendedor?.Telefono,
+                    FechaRegistro = emprendimiento.FechaRegistro
+                });
+            }
+        }
+
+        items = fallbackItems
+            .Where(v => !string.IsNullOrWhiteSpace(v.NombreProductoServicio))
+            .OrderBy(v => v.NombreEmprendimiento)
+            .ThenBy(v => v.NombreProductoServicio)
+            .ToList();
+    }
+
+    return items;
 }
 
         // Listas para llenar los <select> de filtros (categorías y ciudades)

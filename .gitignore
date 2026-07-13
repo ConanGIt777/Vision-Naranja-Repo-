@@ -1,0 +1,9 @@
+## Carpetas de compilación .NET
+bin/
+obj/
+
+## Visual Studio
+.vs/
+
+## Archivos de configuración local sensibles
+appsettings.Development.json

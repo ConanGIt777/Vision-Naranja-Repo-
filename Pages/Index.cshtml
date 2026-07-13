@@ -4,8 +4,76 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Visión Naranja 🟠</h1>
-    <p>Catálogo de emprendimientos locales.</p>
-    <a class="btn btn-primary" asp-page="/Catalogo/Index">Ver catálogo</a>
-</div>
+<section class="hero">
+    <div class="container text-center">
+        <span class="badge-edicion">
+            <span class="dot"></span> Edición 2026
+        </span>
+
+        <h1 class="hero-title">
+            Catálogo <span class="text-naranja">Visión Naranja</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            Descubre el talento local. Apoya a emprendedores que ofrecen productos
+            y servicios excepcionales en nuestra comunidad.
+        </p>
+
+        <div class="hero-actions">
+            <a class="btn btn-naranja" asp-page="/Catalogo/Index" asp-route-tipoOferta="Producto">
+                <i class="bi bi-bag"></i> Explorar Productos
+            </a>
+            <a class="btn btn-outline-dark-rounded" asp-page="/Catalogo/Index" asp-route-tipoOferta="Servicio">
+                <i class="bi bi-briefcase"></i> Ver Servicios
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="destacados">
+    <div class="container text-center">
+        <h2 class="section-title">Noticias Destacadas</h2>
+        <p class="section-subtitle">Entérate de las últimas novedades de nuestros emprendedores</p>
+
+        <div class="row justify-content-center g-4 mt-3">
+            @{
+                string[] avatarColors = { "#E6E1F5", "#FFF3CD", "#DCE6FF", "#E2E2E2" };
+                int i = 0;
+            }
+            @if (Model.Destacados == null || Model.Destacados.Count == 0)
+            {
+                <div class="col-12">
+                    <div class="card-destacado">
+                        <h3 class="card-titulo">Próximamente</h3>
+                        <p class="card-desc">Estamos preparando nuevas noticias destacadas para mostrarte aquí.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in Model.Destacados)
+                {
+                    var color = avatarColors[i % avatarColors.Length];
+                    var nombre = string.IsNullOrWhiteSpace(item.NombreEmprendimiento) ? "Emprendimiento" : item.NombreEmprendimiento;
+                    var inicial = nombre.Substring(0, 1).ToUpper();
+                    var descripcion = string.IsNullOrWhiteSpace(item.Descripcion) ? "Más información próximamente." : (item.Descripcion.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion);
+                    var whatsapp = "https://wa.me/" + (item.Telefono ?? "").Trim();
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="card-destacado h-100">
+                            <div class="avatar-circle" style="background-color:@color;">
+                                @inicial
+                            </div>
+                            <h3 class="card-titulo">@nombre</h3>
+                            <p class="card-desc">@descripcion</p>
+                            <a class="btn btn-whatsapp" href="@whatsapp" target="_blank" rel="noopener">
+                                <i class="bi bi-whatsapp"></i> Contactar por WhatsApp
+                            </a>
+                        </div>
+                    </div>
+                    i++;
+                }
+            }
+        </div>
+    </div>
+</section>
