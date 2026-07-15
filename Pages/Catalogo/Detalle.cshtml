@@ -6,90 +6,144 @@
 
 @if (Model.Emprendimiento is null)
 {
-    <p>No se encontró el emprendimiento solicitado.</p>
+    <div class="container text-center py-5">
+        <p>No se encontró el emprendimiento solicitado.</p>
+        <a asp-page="/Catalogo/Index" class="btn-naranja">Volver al catálogo</a>
+    </div>
 }
 else
 {
     var e = Model.Emprendimiento;
+    var esProducto = e.Productos.Any(p => p.TipoOferta == "Producto");
+    var esServicio = e.Productos.Any(p => p.TipoOferta == "Servicio");
+    var whatsapp = "https://wa.me/" + (e.Telefono ?? "").Trim();
+    var certificaciones = (e.Certificaciones ?? "")
+        .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-    <h1>@e.NombreMarca</h1>
-    <p>@e.Descripcion</p>
-    <p><strong>Ciudad:</strong> @e.Ciudad, @e.Provincia</p>
-    <p><strong>Emprendedor:</strong> @e.NombreCompleto</p>
+    <section class="detalle-wrapper">
+        <div class="container">
+            <div class="row g-4">
+                <!-- ===== COLUMNA IZQUIERDA ===== -->
+                <div class="col-12 col-lg-8">
+                    <div class="detalle-card-principal">
+                        <div class="detalle-logo">
+                            @e.NombreMarca.Substring(0, 1).ToUpper()
+                        </div>
+                        <div class="detalle-info">
+                            <div class="mb-2">
+                                @if (esProducto)
+                                {
+                                    <span class="badge-tipo badge-producto">PRODUCTO</span>
+                                }
+                                @if (esServicio)
+                                {
+                                    <span class="badge-tipo badge-servicio">SERVICIO</span>
+                                }
+                            </div>
+                            <h1 class="detalle-titulo">@e.NombreMarca</h1>
+                            <p class="detalle-descripcion">@e.Descripcion</p>
+                        </div>
+                    </div>
 
-    <h3>Información de contacto y logística</h3>
-    <ul>
-        <li><strong>Correo:</strong> @e.CorreoElectronico</li>
-        @if (!string.IsNullOrWhiteSpace(e.Telefono))
-        {
-            <li><strong>Teléfono:</strong> @e.Telefono</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(e.SitioWeb))
-        {
-            <li><strong>Sitio web:</strong> <a href="@e.SitioWeb" target="_blank">@e.SitioWeb</a></li>
-        }
-        @if (!string.IsNullOrWhiteSpace(e.MediosDePago))
-        {
-            <li><strong>Medios de pago:</strong> @e.MediosDePago</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(e.ZonaDeDespacho))
-        {
-            <li><strong>Zona de despacho:</strong> @e.ZonaDeDespacho</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(e.TiempoDeEntrega))
-        {
-            <li><strong>Tiempo de entrega:</strong> @e.TiempoDeEntrega</li>
-        }
-        @if (!string.IsNullOrWhiteSpace(e.Certificaciones))
-        {
-            <li><strong>Certificaciones:</strong> @e.Certificaciones</li>
-        }
-    </ul>
+                    <h2 class="detalle-subtitulo">Nuestros Productos</h2>
 
-    @if (e.RedesSociales.Any())
-    {
-        <h3>Redes sociales</h3>
-        <ul>
-            @foreach (var red in e.RedesSociales)
-            {
-                <li>
-                    <strong>@red.Plataforma:</strong>
-                    @if (!string.IsNullOrWhiteSpace(red.UrlPerfil))
+                    @if (!e.Productos.Any())
                     {
-                        <a href="@red.UrlPerfil" target="_blank">@red.Usuario</a>
+                        <p class="text-muted">Este emprendimiento aún no tiene productos o servicios disponibles.</p>
                     }
                     else
                     {
-                        @red.Usuario
+                        <div class="row g-4">
+                            @foreach (var p in e.Productos)
+                            {
+                                <div class="col-12 col-sm-6">
+                                    <div class="producto-card">
+                                        <div class="producto-imagen-placeholder">
+                                            <i class="bi bi-image"></i>
+                                        </div>
+                                        <div class="producto-info">
+                                            <h3 class="producto-nombre">@p.Nombre</h3>
+                                            @if (!string.IsNullOrWhiteSpace(e.TiempoDeEntrega))
+                                            {
+                                                <p class="producto-tiempo">
+                                                    <i class="bi bi-clock"></i> @e.TiempoDeEntrega
+                                                </p>
+                                            }
+                                            @if (p.Precio.HasValue)
+                                            {
+                                                <p class="producto-precio">@p.Precio.Value.ToString("C")</p>
+                                            }
+                                            @if (!p.Disponible)
+                                            {
+                                                <span class="badge-no-disponible">No disponible</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
                     }
-                    @if (red.EsPrincipal)
-                    {
-                        <span> (principal)</span>
-                    }
-                </li>
-            }
-        </ul>
-    }
-
-    <h3>Productos y servicios</h3>
-    @if (!e.Productos.Any())
-    {
-        <p>Este emprendimiento aún no tiene productos o servicios disponibles.</p>
-    }
-    else
-    {
-        <div class="row">
-            @foreach (var p in e.Productos)
-            {
-                <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; display:inline-block; width:250px;">
-                    <h4>@p.Nombre</h4>
-                    <p>@p.Categoria | @p.TipoOferta</p>
-                    <p>@p.Descripcion</p>
-                    <p>@(p.Precio.HasValue ? p.Precio.Value.ToString("C") : "Precio a consultar")</p>
                 </div>
-            }
-        </div>
-    }
 
-    <p><a asp-page="/Catalogo/Index">← Volver al catálogo</a></p>
+                <!-- ===== COLUMNA DERECHA ===== -->
+<div class="col-12 col-lg-4">
+    <div class="detalle-sidebar">
+        <h4 class="sidebar-titulo">El Emprendedor</h4>
+        <div class="emprendedor-info">
+            <div class="emprendedor-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <p class="emprendedor-texto">
+                Conoce a la mente detrás de <strong>@e.NombreMarca</strong>.
+            </p>
+        </div>
+
+        @if (certificaciones.Any())
+        {
+            <hr class="sidebar-divider" />
+            <h4 class="sidebar-titulo">Credenciales</h4>
+            <ul class="credenciales-lista">
+                @foreach (var cert in certificaciones)
+                {
+                    <li><i class="bi bi-award"></i> @cert</li>
+                }
+            </ul>
+        }
+
+        @if (e.RedesSociales.Any())
+        {
+            <hr class="sidebar-divider" />
+            <h4 class="sidebar-titulo">Redes Sociales</h4>
+            <ul class="redes-lista">
+                @foreach (var red in e.RedesSociales)
+                {
+                    <li>
+                        <i class="bi bi-link-45deg"></i>
+                        @if (!string.IsNullOrWhiteSpace(red.UrlPerfil))
+                        {
+                            <a href="@red.UrlPerfil" target="_blank">@red.Plataforma: @red.Usuario</a>
+                        }
+                        else
+                        {
+                            <span>@red.Plataforma: @red.Usuario</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+
+        <hr class="sidebar-divider" />
+
+        <a class="btn-whatsapp-grande" href="@whatsapp" target="_blank" rel="noopener">
+            <i class="bi bi-whatsapp"></i>
+            <span>Contactar en<br />WhatsApp</span>
+        </a>
+    </div>
+</div>
+
+            <p class="volver-catalogo">
+                <a asp-page="/Catalogo/Index"><i class="bi bi-arrow-left"></i> Volver al catálogo</a>
+            </p>
+        </div>
+    </section>
 }

@@ -58,17 +58,16 @@
                     var inicial = nombre.Substring(0, 1).ToUpper();
                     var descripcion = string.IsNullOrWhiteSpace(item.Descripcion) ? "Más información próximamente." : (item.Descripcion.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion);
                     var whatsapp = "https://wa.me/" + (item.Telefono ?? "").Trim();
+                    var urlDetalle = Url.Page("/Catalogo/Detalle", new { id = item.EmprendimientoId });
 
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="card-destacado h-100">
+                        <div class="card-destacado h-100 card-clicleable" onclick="location.href='@urlDetalle'">
                             <div class="avatar-circle" style="background-color:@color;">
                                 @inicial
                             </div>
                             <h3 class="card-titulo">@nombre</h3>
                             <p class="card-desc">@descripcion</p>
-                            <a class="btn btn-whatsapp" href="@whatsapp" target="_blank" rel="noopener">
-                                <i class="bi bi-whatsapp"></i> Contactar por WhatsApp
-                            </a>
+                            <a class="btn btn-whatsapp" href="@whatsapp" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="bi bi-whatsapp"></i><span>Contactar por WhatsApp</span></a>
                         </div>
                     </div>
                     i++;
