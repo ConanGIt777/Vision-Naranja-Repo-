@@ -35,44 +35,73 @@
         <h2 class="section-title">Noticias Destacadas</h2>
         <p class="section-subtitle">Entérate de las últimas novedades de nuestros emprendedores</p>
 
-        <div class="row justify-content-center g-4 mt-3">
-            @{
-                string[] avatarColors = { "#E6E1F5", "#FFF3CD", "#DCE6FF", "#E2E2E2" };
-                int i = 0;
-            }
-            @if (Model.Destacados == null || Model.Destacados.Count == 0)
-            {
-                <div class="col-12">
-                    <div class="card-destacado">
-                        <h3 class="card-titulo">Próximamente</h3>
-                        <p class="card-desc">Estamos preparando nuevas noticias destacadas para mostrarte aquí.</p>
-                    </div>
-                </div>
-            }
-            else
-            {
-                @foreach (var item in Model.Destacados)
-                {
-                    var color = avatarColors[i % avatarColors.Length];
-                    var nombre = string.IsNullOrWhiteSpace(item.NombreEmprendimiento) ? "Emprendimiento" : item.NombreEmprendimiento;
-                    var inicial = nombre.Substring(0, 1).ToUpper();
-                    var descripcion = string.IsNullOrWhiteSpace(item.Descripcion) ? "Más información próximamente." : (item.Descripcion.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion);
-                    var whatsapp = "https://wa.me/" + (item.Telefono ?? "").Trim();
-                    var urlDetalle = Url.Page("/Catalogo/Detalle", new { id = item.EmprendimientoId });
+        @{
+            string[] avatarColors = { "#E6E1F5", "#FFF3CD", "#DCE6FF", "#E2E2E2" };
+            int i = 0;
+        }
 
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="card-destacado h-100 card-clicleable" onclick="location.href='@urlDetalle'">
-                            <div class="avatar-circle" style="background-color:@color;">
-                                @inicial
+        @if (Model.Destacados == null || Model.Destacados.Count == 0)
+        {
+            <div class="card-destacado mt-4 mx-auto" style="max-width:400px;">
+                <h3 class="card-titulo">Próximamente</h3>
+                <p class="card-desc">Estamos preparando nuevas noticias destacadas para mostrarte aquí.</p>
+            </div>
+        }
+        else
+        {
+            <div class="carrusel-wrapper mt-4">
+                <button type="button" class="carrusel-flecha carrusel-flecha-izq" id="flechaIzq" aria-label="Anterior">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+
+                <div class="carrusel-track" id="carruselDestacados">
+                    @foreach (var item in Model.Destacados)
+                    {
+                        var color = avatarColors[i % avatarColors.Length];
+                        var nombre = string.IsNullOrWhiteSpace(item.NombreEmprendimiento) ? "Emprendimiento" : item.NombreEmprendimiento;
+                        var inicial = nombre.Substring(0, 1).ToUpper();
+                        var descripcion = string.IsNullOrWhiteSpace(item.Descripcion) ? "Más información próximamente." : (item.Descripcion.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion);
+                        var whatsapp = "https://wa.me/" + (item.Telefono ?? "").Trim();
+                        var urlDetalle = Url.Page("/Catalogo/Detalle", new { id = item.EmprendimientoId });
+
+                        <div class="carrusel-item">
+                            <div class="card-destacado h-100 card-clicleable" onclick="location.href='@urlDetalle'">
+                                <div class="avatar-circle" style="background-color:@color;">
+                                    @inicial
+                                </div>
+                                <h3 class="card-titulo">@nombre</h3>
+                                <p class="card-desc">@descripcion</p>
+                                <a class="btn btn-whatsapp" href="@whatsapp" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="bi bi-whatsapp"></i><span>Contactar por WhatsApp</span></a>
                             </div>
-                            <h3 class="card-titulo">@nombre</h3>
-                            <p class="card-desc">@descripcion</p>
-                            <a class="btn btn-whatsapp" href="@whatsapp" target="_blank" rel="noopener" onclick="event.stopPropagation()"><i class="bi bi-whatsapp"></i><span>Contactar por WhatsApp</span></a>
                         </div>
-                    </div>
-                    i++;
-                }
-            }
-        </div>
+                        i++;
+                    }
+                </div>
+
+                <button type="button" class="carrusel-flecha carrusel-flecha-der" id="flechaDer" aria-label="Siguiente">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        }
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const track = document.getElementById('carruselDestacados');
+            const flechaIzq = document.getElementById('flechaIzq');
+            const flechaDer = document.getElementById('flechaDer');
+            if (!track) return;
+
+            const scrollAmount = () => track.querySelector('.carrusel-item')?.offsetWidth + 20 || 300;
+
+            flechaDer?.addEventListener('click', () => {
+                track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+            });
+            flechaIzq?.addEventListener('click', () => {
+                track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+            });
+        })();
+    </script>
+}

@@ -15,19 +15,19 @@ namespace VisionNaranja.Services
             _context = context;
         }
         // Convierte URL de Drive "ver" → URL directa de imagen
-    public static string? ConvertirUrlDrive(string? url)
+        public static string? ConvertirUrlDrive(string? url)
     {
         if (string.IsNullOrWhiteSpace(url)) return null;
 
         var match = System.Text.RegularExpressions.Regex.Match(
-            url, @"/file/d/([a-zA-Z0-9-]+)");
+            url, @"/file/d/([a-zA-Z0-9_-]+)");
         if (match.Success)
-            return $"https://drive.google.com/uc?export=view&id={match.Groups[1].Value}";
+            return $"https://drive.google.com/thumbnail?id={match.Groups[1].Value}&sz=w1000";
 
         var match2 = System.Text.RegularExpressions.Regex.Match(
-            url, @"[?&]id=([a-zA-Z0-9-]+)");
+            url, @"[?&]id=([a-zA-Z0-9_-]+)");
         if (match2.Success)
-            return $"https://drive.google.com/uc?export=view&id={match2.Groups[1].Value}";
+            return $"https://drive.google.com/thumbnail?id={match2.Groups[1].Value}&sz=w1000";
 
         return url;
     }
@@ -242,3 +242,4 @@ namespace VisionNaranja.Services
     }
     
 }
+

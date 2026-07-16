@@ -180,6 +180,70 @@ body {
   line-height: 1.3;
 }
 
+/* ===== CARRUSEL NOTICIAS DESTACADAS ===== */
+.carrusel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.carrusel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 0.5rem 0.25rem 1.5rem;
+  width: 100%;
+
+  /* Oculta la barra de scroll pero mantiene la funcionalidad */
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/Edge viejo */
+}
+.carrusel-track::-webkit-scrollbar {
+  display: none;               /* Chrome/Safari/Edge nuevo */
+}
+
+.carrusel-item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 260px;
+}
+
+@media (min-width: 576px) {
+  .carrusel-item { width: 280px; }
+}
+
+.carrusel-flecha {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: var(--vn-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  z-index: 5;
+}
+.carrusel-flecha:hover {
+  background: var(--vn-naranja);
+  color: #fff;
+  border-color: var(--vn-naranja);
+}
+.carrusel-flecha-izq { margin-right: 12px; }
+.carrusel-flecha-der { margin-left: 12px; }
+
+/* En móvil, oculta las flechas y confía en el swipe táctil */
+@media (max-width: 767px) {
+  .carrusel-flecha { display: none; }
+  .carrusel-wrapper { padding: 0 0.5rem; }
+}
+
 /* ===== FOOTER ===== */
 .vn-footer {
   background: var(--vn-navy);
