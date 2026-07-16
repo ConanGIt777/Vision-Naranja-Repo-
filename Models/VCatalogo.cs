@@ -71,6 +71,10 @@ public partial class VCatalogo
      [NotMapped]
     public string? ImagenPortadaUrl { get; set; }
 
+    [StringLength(500)]
+    public string? EnlaceDriveFotos { get; set; }
+
     [NotMapped]
     public bool TieneVideo { get; set; }
+
 }

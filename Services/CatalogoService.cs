@@ -14,7 +14,23 @@ namespace VisionNaranja.Services
         {
             _context = context;
         }
+        // Convierte URL de Drive "ver" → URL directa de imagen
+    public static string? ConvertirUrlDrive(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return null;
 
+        var match = System.Text.RegularExpressions.Regex.Match(
+            url, @"/file/d/([a-zA-Z0-9-]+)");
+        if (match.Success)
+            return $"https://drive.google.com/uc?export=view&id={match.Groups[1].Value}";
+
+        var match2 = System.Text.RegularExpressions.Regex.Match(
+            url, @"[?&]id=([a-zA-Z0-9-]+)");
+        if (match2.Success)
+            return $"https://drive.google.com/uc?export=view&id={match2.Groups[1].Value}";
+
+        return url;
+    }
         // Lista todo el catálogo público, con filtros opcionales
         public async Task<List<VCatalogo>> ObtenerCatalogoAsync(
     string? categoria = null,
@@ -81,7 +97,9 @@ namespace VisionNaranja.Services
                     Descripcion = emprendimiento.Descripcion,
                     CorreoElectronico = emprendimiento.Emprendedor?.CorreoElectronico ?? string.Empty,
                     Telefono = emprendimiento.Emprendedor?.Telefono,
-                    FechaRegistro = emprendimiento.FechaRegistro
+                    FechaRegistro = emprendimiento.FechaRegistro,
+                    EnlaceDriveFotos = emprendimiento.EnlaceDriveFotos,
+                    ImagenPortadaUrl = ConvertirUrlDrive(emprendimiento.EnlaceDriveFotos),
                 });
                 continue;
             }
@@ -104,7 +122,9 @@ namespace VisionNaranja.Services
                     Descripcion = emprendimiento.Descripcion,
                     CorreoElectronico = emprendimiento.Emprendedor?.CorreoElectronico ?? string.Empty,
                     Telefono = emprendimiento.Emprendedor?.Telefono,
-                    FechaRegistro = emprendimiento.FechaRegistro
+                    FechaRegistro = emprendimiento.FechaRegistro,
+                    EnlaceDriveFotos = emprendimiento.EnlaceDriveFotos,
+                    ImagenPortadaUrl = ConvertirUrlDrive(emprendimiento.EnlaceDriveFotos)
                 });
             }
         }
@@ -163,7 +183,7 @@ namespace VisionNaranja.Services
                 ZonaDeDespacho = reader["ZonaDeDespacho"] as string,
                 TiempoDeEntrega = reader["TiempoDeEntrega"] as string,
                 Certificaciones = reader["Certificaciones"] as string,
-                EnlaceDriveFotos = reader["EnlaceDriveFotos"] as string,
+                EnlaceDriveFotos = ConvertirUrlDrive(reader["EnlaceDriveFotos"] as string),
                 FechaRegistro = reader.GetDateTime(reader.GetOrdinal("FechaRegistro")),
                 Activo = reader.GetBoolean(reader.GetOrdinal("Activo")),
                 EmprendedorId = reader.GetInt32(reader.GetOrdinal("EmprendedorId")),
