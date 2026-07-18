@@ -16,6 +16,8 @@ public partial class VisionNaranjaContext : DbContext
     {
     }
 
+    public virtual DbSet<AdminUsuario> AdminUsuarios { get; set; }
+
     public virtual DbSet<Categoria> Categorias { get; set; }
 
     public virtual DbSet<Ciudad> Ciudades { get; set; }

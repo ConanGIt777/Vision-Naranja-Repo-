@@ -1,0 +1,24 @@
+@page
+@model VisionNaranja.Pages.Admin.LoginModel
+@{
+    ViewData["Title"] = "Admin - Iniciar sesión";
+}
+
+<div class="container" style="max-width:380px; margin-top:5rem;">
+    <h2 class="mb-4 text-center">Panel Administrativo</h2>
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <input type="text" name="Username" class="form-control" required autofocus />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="Password" class="form-control" required />
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Error))
+        {
+            <div class="alert alert-danger">@Model.Error</div>
+        }
+        <button type="submit" class="btn btn-naranja w-100">Iniciar sesión</button>
+    </form>
+</div>

@@ -1,0 +1,135 @@
+@page "{id:int}"
+@model VisionNaranja.Pages.Admin.Emprendimientos.EditModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Editar Emprendimiento";
+}
+
+@if (Model.Emprendimiento is null)
+{
+    <div class="alert alert-danger">No se encontró el emprendimiento.</div>
+}
+else
+{
+    <h1 class="h3 mb-4">Editar: @Model.Emprendimiento.NombreMarca</h1>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="admin-form-card" style="max-width:720px;">
+        <form method="post" asp-page-handler="Guardar">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Emprendedor</label>
+                    <select name="EmprendedorId" class="form-select" required asp-items="@(new SelectList(Model.Emprendedores, "EmprendedorId", "NombreCompleto", Model.Emprendimiento.EmprendedorId))"></select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Ciudad</label>
+                    <select name="CiudadId" class="form-select" required asp-items="@(new SelectList(Model.Ciudades, "CiudadId", "Nombre", Model.Emprendimiento.CiudadId))"></select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Nombre de marca</label>
+                    <input type="text" name="NombreMarca" class="form-control" required maxlength="150" value="@Model.Emprendimiento.NombreMarca" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="Descripcion" class="form-control" rows="3" required maxlength="500">@Model.Emprendimiento.Descripcion</textarea>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Sitio web</label>
+                    <input type="text" name="SitioWeb" class="form-control" maxlength="255" value="@Model.Emprendimiento.SitioWeb" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Medios de pago</label>
+                    <input type="text" name="MediosDePago" class="form-control" maxlength="255" value="@Model.Emprendimiento.MediosDePago" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Zona de despacho</label>
+                    <input type="text" name="ZonaDeDespacho" class="form-control" maxlength="255" value="@Model.Emprendimiento.ZonaDeDespacho" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tiempo de entrega</label>
+                    <input type="text" name="TiempoDeEntrega" class="form-control" maxlength="100" value="@Model.Emprendimiento.TiempoDeEntrega" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Certificaciones (separadas por coma)</label>
+                    <input type="text" name="Certificaciones" class="form-control" maxlength="255" value="@Model.Emprendimiento.Certificaciones" />
+                </div>
+                <div class="col-12">
+                    @if (Model.Emprendimiento.Activo)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" name="Activo" class="form-check-input" value="true" checked />
+                            <label class="form-check-label">Activo</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" name="Activo" class="form-check-input" value="true" />
+                            <label class="form-check-label">Activo</label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger mt-3">@Model.Error</div>
+            }
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-naranja">Guardar cambios</button>
+                <a asp-page="Index" class="btn btn-outline-secondary">Volver al listado</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-form-card mt-4" style="max-width:720px;">
+        <h5 class="mb-3">Redes Sociales</h5>
+
+        @if (Model.Emprendimiento.RedesSociales.Any())
+        {
+            <ul class="list-group mb-3">
+                @foreach (var red in Model.Emprendimiento.RedesSociales)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><strong>@red.Plataforma</strong>: @red.Usuario @(red.EsPrincipal ? " (principal)" : "")</span>
+                        <form method="post" asp-page-handler="EliminarRed" asp-route-redSocialId="@red.RedSocialId" asp-route-id="@Model.Emprendimiento.EmprendimientoId"
+                              onsubmit="return confirm('¿Quitar esta red social?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted">Sin redes sociales registradas.</p>
+        }
+
+        <form method="post" asp-page-handler="AgregarRed" class="row g-2">
+            <input type="hidden" name="id" value="@Model.Emprendimiento.EmprendimientoId" />
+            <div class="col-md-3">
+                <select name="Plataforma" class="form-select" required>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Facebook">Facebook</option>
+                    <option value="TikTok">TikTok</option>
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="Usuario" class="form-control" placeholder="@@usuario" required />
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="UrlPerfil" class="form-control" placeholder="https:// (opcional)" />
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-outline-naranja w-100"><i class="bi bi-plus-lg"></i></button>
+            </div>
+        </form>
+    </div>
+}

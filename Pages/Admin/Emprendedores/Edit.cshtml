@@ -1,0 +1,63 @@
+@page "{id:int}"
+@model VisionNaranja.Pages.Admin.Emprendedores.EditModel
+@{
+    ViewData["Title"] = "Editar Emprendedor";
+}
+
+<h1 class="h3 mb-4">Editar Emprendedor</h1>
+
+@if (Model.Emprendedor is null)
+{
+    <div class="alert alert-danger">No se encontró el emprendedor.</div>
+}
+else
+{
+    <div class="admin-form-card">
+        <div class="mb-3 d-flex align-items-center gap-3">
+            @if (Model.Emprendedor.FotoPerfil != null)
+            {
+                <img src="/Media/Emprendedor/@Model.Emprendedor.EmprendedorId" class="admin-avatar-thumb" style="width:64px;height:64px;" alt="" />
+            }
+            else
+            {
+                <div class="admin-avatar-thumb d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+                    <i class="bi bi-person fs-3"></i>
+                </div>
+            }
+            <span class="text-muted small">Foto actual (sube una nueva para reemplazarla)</span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" name="NombreCompleto" class="form-control" required maxlength="150" value="@Model.Emprendedor.NombreCompleto" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Correo electrónico</label>
+                <input type="email" name="CorreoElectronico" class="form-control" required maxlength="150" value="@Model.Emprendedor.CorreoElectronico" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="text" name="Telefono" class="form-control" maxlength="20" value="@Model.Emprendedor.Telefono" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Reemplazar foto de perfil</label>
+                <input type="file" name="Foto" class="form-control" accept="image/*" />
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" name="Activo" class="form-check-input" value="true" checked="@Model.Emprendedor.Activo" />
+                <label class="form-check-label">Activo</label>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger">@Model.Error</div>
+            }
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-naranja">Guardar cambios</button>
+                <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+}
