@@ -51,7 +51,7 @@
                     <td>@p.Nombre</td>
                     <td>@p.Emprendimiento?.NombreMarca</td>
                     <td>@p.Categoria?.Nombre</td>
-                    <td>@p.TipoOferta</td>
+                    <td>@p.TipoOfertaTexto</td>
                     <td>@(p.Precio.HasValue ? p.Precio.Value.ToString("C") : "—")</td>
                     <td>
                         @if (p.Disponible)

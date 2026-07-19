@@ -8,8 +8,12 @@
 <h1 class="h3 mb-4">Nuevo Emprendimiento</h1>
 
 <div class="admin-form-card" style="max-width:720px;">
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label">Logo del emprendimiento (opcional, puedes subirlo después)</label>
+                <input type="file" name="Logo" class="form-control" accept="image/*" />
+            </div>
             <div class="col-md-6">
                 <label class="form-label">Emprendedor</label>
                 <select name="EmprendedorId" class="form-select" required asp-items="@(new SelectList(Model.Emprendedores, "EmprendedorId", "NombreCompleto"))">

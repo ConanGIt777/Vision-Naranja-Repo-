@@ -28,7 +28,7 @@ namespace VisionNaranja.Pages.Admin.Emprendimientos
         public async Task<IActionResult> OnPostAsync(
             int emprendedorId, int ciudadId, string nombreMarca, string descripcion,
             string? sitioWeb, string? mediosDePago, string? zonaDeDespacho,
-            string? tiempoDeEntrega, string? certificaciones, bool activo)
+            string? tiempoDeEntrega, string? certificaciones, bool activo, IFormFile? logo)
         {
             await OnGetAsync(); // recargar dropdowns por si hay que re-mostrar el form
 
@@ -52,6 +52,14 @@ namespace VisionNaranja.Pages.Admin.Emprendimientos
                 FechaRegistro = DateTime.Now,
                 Activo = activo
             };
+
+            if (logo is { Length: > 0 })
+            {
+                using var ms = new MemoryStream();
+                await logo.CopyToAsync(ms);
+                emprendimiento.Logo = ms.ToArray();
+                emprendimiento.LogoMime = logo.ContentType;
+            }
 
             _context.Emprendimientos.Add(emprendimiento);
             await _context.SaveChangesAsync();

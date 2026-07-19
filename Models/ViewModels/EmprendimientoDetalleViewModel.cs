@@ -11,6 +11,8 @@ namespace VisionNaranja.Models.ViewModels
         public string? TiempoDeEntrega { get; set; }
         public string? Certificaciones { get; set; }
         public string? EnlaceDriveFotos { get; set; }
+        public string? LogoUrl { get; set; }
+        public string? FotoEmprendedorUrl { get; set; }
         public DateTime FechaRegistro { get; set; }
         public bool Activo { get; set; }
 
@@ -47,5 +49,6 @@ namespace VisionNaranja.Models.ViewModels
         public decimal? Precio { get; set; }
         public bool Disponible { get; set; }
         public DateTime FechaRegistro { get; set; }
+        public string? ImagenPortadaUrl { get; set; }
     }
 }

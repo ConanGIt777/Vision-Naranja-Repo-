@@ -9,7 +9,8 @@ namespace VisionNaranja.Pages.Admin.Productos
     {
         public int ProductoServicioId { get; set; }
         public string Nombre { get; set; } = null!;
-        public string TipoOferta { get; set; } = null!; // Se queda como string para mostrar el texto en la tabla
+        public byte TipoOferta { get; set; }
+        public string TipoOfertaTexto => TipoOferta == 1 ? "Producto" : "Servicio";
         public decimal? Precio { get; set; }
         public bool Disponible { get; set; }
         public VisionNaranja.Models.Emprendimiento? Emprendimiento { get; set; }
@@ -43,7 +44,7 @@ namespace VisionNaranja.Pages.Admin.Productos
                 Nombre = p.Nombre,
                 
                 // Traducimos el número byte a su texto correspondiente de manera limpia
-                TipoOferta = p.TipoOferta == 1 ? "Producto" : p.TipoOferta == 2 ? "Servicio" : "—",
+                TipoOferta = p.TipoOferta,
                 
                 Precio = p.Precio,
                 Disponible = p.Disponible,

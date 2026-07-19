@@ -37,7 +37,7 @@ namespace VisionNaranja.Pages.Admin.Emprendimientos
         public async Task<IActionResult> OnPostGuardarAsync(
             int id, int emprendedorId, int ciudadId, string nombreMarca, string descripcion,
             string? sitioWeb, string? mediosDePago, string? zonaDeDespacho,
-            string? tiempoDeEntrega, string? certificaciones, bool activo)
+            string? tiempoDeEntrega, string? certificaciones, bool activo, IFormFile? logo)
         {
             Emprendimiento = await _context.Emprendimientos
                 .Include(e => e.RedesSociales)
@@ -64,6 +64,14 @@ namespace VisionNaranja.Pages.Admin.Emprendimientos
             Emprendimiento.Certificaciones = string.IsNullOrWhiteSpace(certificaciones) ? null : certificaciones.Trim();
             Emprendimiento.Activo = activo;
 
+            if (logo is { Length: > 0 })
+            {
+                using var ms = new MemoryStream();
+                await logo.CopyToAsync(ms);
+                Emprendimiento.Logo = ms.ToArray();
+                Emprendimiento.LogoMime = logo.ContentType;
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["Mensaje"] = "Cambios guardados correctamente.";
@@ -82,7 +90,7 @@ namespace VisionNaranja.Pages.Admin.Emprendimientos
                     Plataforma = plataforma.Trim(),
                     Usuario = usuario.Trim(),
                     UrlPerfil = string.IsNullOrWhiteSpace(urlPerfil) ? null : urlPerfil.Trim(),
-                    EsPrincipal = !yaHayPrincipal // la primera que se agrega queda como principal
+                    EsPrincipal = !yaHayPrincipal
                 });
                 await _context.SaveChangesAsync();
             }

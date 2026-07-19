@@ -67,7 +67,14 @@
                         <div class="carrusel-item">
                             <div class="card-destacado h-100 card-clicleable" onclick="location.href='@urlDetalle'">
                                 <div class="avatar-circle" style="background-color:@color;">
-                                    @inicial
+                                    @if (!string.IsNullOrEmpty(item.ImagenPortadaUrl))
+                                    {
+                                        <img src="@item.ImagenPortadaUrl" alt="@nombre" />
+                                    }
+                                    else
+                                    {
+                                        @inicial
+                                    }
                                 </div>
                                 <h3 class="card-titulo">@nombre</h3>
                                 <p class="card-desc">@descripcion</p>

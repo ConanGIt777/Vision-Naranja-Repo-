@@ -244,6 +244,17 @@ body {
   .carrusel-wrapper { padding: 0 0.5rem; }
 }
 
+.avatar-circle {
+  overflow: hidden;
+  position: relative;
+}
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 /* ===== FOOTER ===== */
 .vn-footer {
   background: var(--vn-navy);
@@ -366,6 +377,19 @@ body {
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
+}
+
+.detalle-logo img,
+.emprendedor-avatar img,
+.producto-imagen-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.detalle-logo,
+.emprendedor-avatar,
+.producto-imagen-placeholder {
+  overflow: hidden;
 }
 
 /* ===== SIDEBAR ===== */
