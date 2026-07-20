@@ -40,6 +40,11 @@ public partial class Emprendimiento
     [StringLength(500)]
     public string? EnlaceDriveFotos { get; set; }
 
+    public byte[]? Logo { get; set; }
+
+    [StringLength(50)]
+    public string? LogoMime { get; set; }
+
     public DateTime FechaRegistro { get; set; }
 
     public bool Activo { get; set; }

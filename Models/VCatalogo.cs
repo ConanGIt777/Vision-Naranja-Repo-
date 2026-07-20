@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace VisionNaranja.Models;
 
 [Keyless]
@@ -66,4 +67,14 @@ public partial class VCatalogo
     public string? Telefono { get; set; }
 
     public DateTime FechaRegistro { get; set; }
+
+     [NotMapped]
+    public string? ImagenPortadaUrl { get; set; }
+
+    [StringLength(500)]
+    public string? EnlaceDriveFotos { get; set; }
+
+    [NotMapped]
+    public bool TieneVideo { get; set; }
+
 }

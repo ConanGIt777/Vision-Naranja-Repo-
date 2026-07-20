@@ -3,48 +3,157 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Catálogo de Emprendimientos";
+    var esSoloProductos = Model.TipoOferta == "Producto";
+    var esSoloServicios = Model.TipoOferta == "Servicio";
+    var tituloPagina = esSoloProductos ? "Emprendedores de Productos"
+                      : esSoloServicios ? "Emprendedores de Servicios"
+                      : "Catálogo Visión Naranja";
+    var subtituloPagina = esSoloProductos ? "Explora artículos tangibles, artesanías y alimentos creados con dedicación."
+                         : esSoloServicios ? "Descubre servicios profesionales ofrecidos por emprendedores locales."
+                         : "Explora todo lo que nuestra comunidad de emprendedores tiene para ofrecer.";
 }
 
-<h1>Visión Naranja — Catálogo</h1>
+<section class="catalogo-header">
+    <div class="container">
+        <div class="catalogo-header-icono">
+            @if (esSoloServicios)
+            {
+                <i class="bi bi-briefcase"></i>
+            }
+            else
+            {
+                <i class="bi bi-bag"></i>
+            }
+        </div>
+        <h1 class="catalogo-title">@tituloPagina</h1>
+        <p class="catalogo-subtitle">@subtituloPagina</p>
+    </div>
+</section>
 
-<form method="get">
-    <select name="Categoria" asp-items="@(new SelectList(Model.Categorias, "Nombre", "Nombre"))">
-        <option value="">Todas las categorías</option>
-    </select>
+<section class="catalogo-resultados">
+    <div class="container">
+        <div class="resultados-toolbar">
+            <div>
+                <h2 class="resultados-titulo">Catálogo de Productos</h2>
+                <p class="resultados-count">
+                    Mostrando <strong>@Model.Items.Count</strong> emprendimiento(s)
+                </p>
+            </div>
 
-    <select name="CiudadId" asp-items="@(new SelectList(Model.Ciudades, "CiudadId", "Nombre"))">
-        <option value="">Todas las ciudades</option>
-    </select>
+            <form method="get" class="toolbar-form" id="filtrosForm">
+                @if (!string.IsNullOrEmpty(Model.TipoOferta))
+                {
+                    <input type="hidden" name="TipoOferta" value="@Model.TipoOferta" />
+                }
+                <div class="toolbar-busqueda">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="Termino" placeholder="Buscar emprendimiento..." value="@Model.Termino" />
+                </div>
 
-    <select name="TipoOferta">
-        <option value="">Producto y servicio</option>
-        <option value="Producto">Solo productos</option>
-        <option value="Servicio">Solo servicios</option>
-    </select>
+                <button type="button" class="btn-filtrar" id="btnFiltrar">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
 
-    <input type="text" name="Termino" placeholder="Buscar..." value="@Model.Termino" />
+                <div class="panel-filtros" id="panelFiltros">
+                    <label class="filtro-label">Categoría</label>
+                    <select name="Categoria" class="filtro-select" asp-items="@(new SelectList(Model.Categorias, "Nombre", "Nombre", Model.Categoria))">
+                        <option value="">Todas las categorías</option>
+                    </select>
 
-    <button type="submit">Filtrar</button>
-</form>
+                    <label class="filtro-label">Ciudad</label>
+                    <select name="CiudadId" class="filtro-select" asp-items="@(new SelectList(Model.Ciudades, "CiudadId", "Nombre", Model.CiudadId))">
+                        <option value="">Todas las ciudades</option>
+                    </select>
 
-<hr />
+                    @if (string.IsNullOrEmpty(Model.TipoOferta))
+                    {
+                        <label class="filtro-label">Tipo</label>
+                        <select name="TipoOferta" class="filtro-select">
+                            <option value="">Producto y servicio</option>
+                            <option value="Producto">Solo productos</option>
+                            <option value="Servicio">Solo servicios</option>
+                        </select>
+                    }
 
-@if (!Model.Items.Any())
-{
-    <p>No se encontraron resultados.</p>
-}
-else
-{
-    <div class="row">
-        @foreach (var item in Model.Items)
+                    <button type="submit" class="btn-naranja btn-aplicar-filtros">Aplicar filtros</button>
+                </div>
+            </form>
+        </div>
+
+        @if (!Model.Items.Any())
         {
-            <div class="card" style="border:1px solid #ccc; padding:10px; margin:10px; display:inline-block; width:250px;">
-                <h3>@item.NombreProductoServicio</h3>
-                <p><strong>@item.NombreEmprendimiento</strong> — @item.Ciudad</p>
-                <p>@item.Categoria | @item.TipoOferta</p>
-                <p>@(item.Precio.HasValue ? item.Precio.Value.ToString("C") : "Precio a consultar")</p>
-                <a asp-page="/Catalogo/Detalle" asp-route-id="@item.EmprendimientoId">Ver emprendimiento</a>
+            <div class="sin-resultados text-center">
+                <i class="bi bi-inbox"></i>
+                <p>No se encontraron resultados con esos filtros.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                        <a class="card-emprendimiento-link" asp-page="/Catalogo/Detalle" asp-route-id="@item.EmprendimientoId">
+                            <div class="card-emprendimiento h-100">
+                                <div class="card-imagen">
+                                    @if (!string.IsNullOrEmpty(item.ImagenPortadaUrl))
+                                    {
+                                        <img src="@item.ImagenPortadaUrl" alt="@item.NombreProductoServicio" />
+                                    }
+                                    else
+                                    {
+                                        <div class="card-imagen-placeholder"><i class="bi bi-image"></i></div>
+                                    }
+
+                                    <span class="badge-flotante badge-tipo-flotante">
+                                        @(item.TipoOferta == "Servicio" ? "Servicio" : "Producto")
+                                    </span>
+
+                                    @if (item.TieneVideo)
+                                    {
+                                        <span class="badge-flotante badge-video">
+                                            <i class="bi bi-play-fill"></i> Video disponible
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="card-emprendimiento-body">
+                                    <h3 class="card-emprendimiento-titulo">@item.NombreEmprendimiento</h3>
+                                    <p class="card-emprendimiento-desc">
+                                        @(item.Descripcion?.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion)
+                                    </p>
+
+                                    <hr class="card-divider" />
+
+                                    <p class="card-contacto">
+                                        <i class="bi bi-envelope"></i> @item.CorreoElectronico
+                                    </p>
+                                    <p class="card-contacto card-contacto-secundario">
+                                        <i class="bi bi-geo-alt"></i> @item.Ciudad
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
             </div>
         }
     </div>
+</section>
+
+@section Scripts {
+    <script>
+        const btnFiltrar = document.getElementById('btnFiltrar');
+        const panelFiltros = document.getElementById('panelFiltros');
+
+        btnFiltrar.addEventListener('click', () => {
+            panelFiltros.classList.toggle('abierto');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!panelFiltros.contains(e.target) && e.target !== btnFiltrar && !btnFiltrar.contains(e.target)) {
+                panelFiltros.classList.remove('abierto');
+            }
+        });
+    </script>
 }

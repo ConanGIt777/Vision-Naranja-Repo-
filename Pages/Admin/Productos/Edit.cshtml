@@ -1,0 +1,136 @@
+@page "{id:int}"
+@model VisionNaranja.Pages.Admin.Productos.EditModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Editar Producto/Servicio";
+}
+
+@if (Model.Producto is null)
+{
+    <div class="alert alert-danger">No se encontró el producto.</div>
+}
+else
+{
+    <h1 class="h3 mb-4">Editar: @Model.Producto.Nombre</h1>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success">@TempData["Mensaje"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="admin-form-card">
+        <form method="post" asp-page-handler="Guardar">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Emprendimiento</label>
+                    <select name="EmprendimientoId" class="form-select" required asp-items="@(new SelectList(Model.Emprendimientos, "EmprendimientoId", "NombreMarca", Model.Producto.EmprendimientoId))"></select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Categoría</label>
+                    <select name="CategoriaId" class="form-select" required asp-items="@(new SelectList(Model.Categorias, "CategoriaId", "Nombre", Model.Producto.CategoriaId))"></select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="Nombre" class="form-control" required maxlength="200" value="@Model.Producto.Nombre" />
+                </div>
+                <div class="col-md-4">
+                <label class="form-label">Tipo</label>
+                <select name="TipoOferta" class="form-select" required>
+                    <!-- Comparamos el byte con números (1 y 2) en lugar de texto -->
+                    <option value="1" selected="@(Model.Producto.TipoOferta == 1)">Producto</option>
+                    <option value="2" selected="@(Model.Producto.TipoOferta == 2)">Servicio</option>
+                </select>
+                 </div>
+                <div class="col-12">
+                    <label class="form-label">Descripción</label>
+                    <textarea name="Descripcion" class="form-control" rows="3" maxlength="500">@Model.Producto.Descripcion</textarea>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Precio (opcional)</label>
+                    <input type="number" name="Precio" class="form-control" step="0.01" min="0" value="@Model.Producto.Precio" />
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    @if (Model.Producto.Disponible)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" name="Disponible" class="form-check-input" value="true" checked />
+                            <label class="form-check-label">Disponible</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" name="Disponible" class="form-check-input" value="true" />
+                            <label class="form-check-label">Disponible</label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger mt-3">@Model.Error</div>
+            }
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-naranja">Guardar cambios</button>
+                <a asp-page="Index" class="btn btn-outline-secondary">Volver al listado</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="admin-form-card mt-4">
+        <h5 class="mb-3">Fotos</h5>
+
+        @if (Model.Producto.MediaProductos.Any())
+        {
+            <div class="row g-3 mb-4">
+                @foreach (var media in Model.Producto.MediaProductos.OrderByDescending(m => m.EsPortada).ThenBy(m => m.Orden))
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="position-relative">
+                            <img src="/Media/Producto/@media.MediaId" class="w-100" style="aspect-ratio:1; object-fit:cover; border-radius:10px;" alt="" />
+                            @if (media.EsPortada)
+                            {
+                                <span class="badge bg-naranja position-absolute top-0 start-0 m-1">Portada</span>
+                            }
+                            <div class="d-flex gap-1 mt-2">
+                                @if (!media.EsPortada)
+                                {
+                                    <form method="post" asp-page-handler="MarcarPortada" asp-route-id="@Model.Producto.ProductoServicioId" asp-route-mediaId="@media.MediaId">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Marcar como portada">
+                                            <i class="bi bi-star"></i>
+                                        </button>
+                                    </form>
+                                }
+                                <form method="post" asp-page-handler="EliminarImagen" asp-route-id="@Model.Producto.ProductoServicioId" asp-route-mediaId="@media.MediaId"
+                                      onsubmit="return confirm('¿Eliminar esta foto?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Aún no hay fotos. Sube la primera abajo (se marcará automáticamente como portada).</p>
+        }
+
+        <form method="post" asp-page-handler="SubirImagenes" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="@Model.Producto.ProductoServicioId" />
+            <div class="mb-3">
+                <label class="form-label">Agregar fotos (puedes seleccionar varias)</label>
+                <input type="file" name="Fotos" class="form-control" accept="image/*" multiple required />
+            </div>
+            <button type="submit" class="btn btn-naranja"><i class="bi bi-upload"></i> Subir fotos</button>
+        </form>
+    </div>
+}

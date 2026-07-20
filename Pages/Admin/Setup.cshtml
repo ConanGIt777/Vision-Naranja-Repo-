@@ -1,0 +1,34 @@
+@page
+@model VisionNaranja.Pages.Admin.SetupModel
+@{
+    ViewData["Title"] = "Configuración inicial";
+}
+
+<div class="container" style="max-width:420px; margin-top:4rem;">
+    @if (Model.YaExisteAdmin)
+    {
+        <div class="alert alert-warning">
+            Ya existe un administrador configurado. Esta página está deshabilitada.
+            <a asp-page="/Admin/Login">Ir al login</a>
+        </div>
+    }
+    else
+    {
+        <h2 class="mb-4">Crear administrador</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Usuario</label>
+                <input type="text" name="Username" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="Password" class="form-control" required minlength="8" />
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Error))
+            {
+                <div class="alert alert-danger">@Model.Error</div>
+            }
+            <button type="submit" class="btn btn-naranja w-100">Crear administrador</button>
+        </form>
+    }
+</div>
