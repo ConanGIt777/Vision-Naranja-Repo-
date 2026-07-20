@@ -102,12 +102,27 @@
             if (!track) return;
 
             const scrollAmount = () => track.querySelector('.carrusel-item')?.offsetWidth + 20 || 300;
+            const tolerancia = 5;
 
             flechaDer?.addEventListener('click', () => {
-                track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                const maxScroll = track.scrollWidth - track.clientWidth;
+                const llegoAlFinal = track.scrollLeft >= maxScroll - tolerancia;
+
+                if (llegoAlFinal) {
+                    track.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                }
             });
+
             flechaIzq?.addEventListener('click', () => {
-                track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                const enElInicio = track.scrollLeft <= tolerancia;
+
+                if (enElInicio) {
+                    track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+                } else {
+                    track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                }
             });
         })();
     </script>

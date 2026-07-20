@@ -25,7 +25,6 @@ namespace VisionNaranja.Pages
                     .GroupBy(v => v.EmprendimientoId)
                     .Select(g => g.First())
                     .OrderByDescending(v => v.FechaRegistro)
-                    .Take(4)
                     .ToList();
             }
             catch
