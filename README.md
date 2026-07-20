@@ -1,6 +1,6 @@
 # 🟠 Visión Naranja
 
-Catálogo web de emprendimientos locales — conecta a emprendedores con productos y servicios excepcionales con la comunidad. Proyecto desarrollado para la **Universidad Internacional SEK (UISEK)**.
+Catálogo web de emprendimientos locales - conecta a emprendedores con productos y servicios excepcionales con la comunidad. Proyecto desarrollado para la **Universidad Internacional SEK (UISEK)**.
 ---
 
 ## 📋 Descripción
@@ -129,4 +129,4 @@ Proyecto desarrollado por estudiantes Jaime Jiménez y Caleb Molina de la **Univ
 
 ## 📄 Licencia
 
-Proyecto académico — Edición 2026.
+Proyecto académico - Edición 2026.
