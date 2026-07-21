@@ -40,9 +40,21 @@ namespace VisionNaranja.Services
 
             var productoIds = items.Select(i => i.ProductoServicioId).Where(id => id > 0).Distinct().ToList();
             var emprendimientoIds = items.Select(i => i.EmprendimientoId).Distinct().ToList();
-
             
+            // Cargar todas las portadas de una vez
+            var portadas = await _context.MediaProductos
+                .Where(m => productoIds.Contains(m.ProductoServicioId) && m.EsPortada)
+                .Select(m => new { m.ProductoServicioId, m.MediaId })
+                .ToDictionaryAsync(m => m.ProductoServicioId, m => m.MediaId);
 
+            // Cargar información de videos
+            var videos = await _context.MediaProductos
+                .Where(m => productoIds.Contains(m.ProductoServicioId) && m.TipoMedia == "Video")
+                .Select(m => m.ProductoServicioId)
+                .Distinct()
+                .ToListAsync();
+
+            // Cargar logos de emprendimientos
             var logos = await _context.Emprendimientos
                 .Where(e => emprendimientoIds.Contains(e.EmprendimientoId) && e.Logo != null)
                 .Select(e => e.EmprendimientoId)
@@ -50,25 +62,25 @@ namespace VisionNaranja.Services
 
             foreach (var item in items)
             {
-                item.TieneVideo = productoIds.Count > 0 &&
-                    _context.MediaProductos.Any(m => m.ProductoServicioId == item.ProductoServicioId && m.TipoMedia == "Video");
+                // Indicar si tiene video
+                item.TieneVideo = videos.Contains(item.ProductoServicioId);
 
-                // Prioridad 1: logo propio del emprendimiento
-                if (logos.Contains(item.EmprendimientoId))
+                // Prioridad 1: portada propia del producto
+                if (portadas.TryGetValue(item.ProductoServicioId, out var mediaId))
+                {
+                    item.ImagenPortadaUrl = $"/Media/Producto/{mediaId}";
+                    continue;
+                }
+
+                // Prioridad 2: si es una tarjeta de solo emprendimiento (sin producto específico), mostrar logo
+                if (item.ProductoServicioId == 0 && logos.Contains(item.EmprendimientoId))
                 {
                     item.ImagenPortadaUrl = $"/Media/Emprendimiento/{item.EmprendimientoId}";
                     continue;
                 }
 
-                // Prioridad 2: portada del producto
-                var portada = await _context.MediaProductos
-                    .Where(m => m.ProductoServicioId == item.ProductoServicioId && m.EsPortada)
-                    .Select(m => (int?)m.MediaId)
-                    .FirstOrDefaultAsync();
-
-                if (portada.HasValue)
-                    item.ImagenPortadaUrl = $"/Media/Producto/{portada.Value}";
-                else if (!string.IsNullOrWhiteSpace(item.EnlaceDriveFotos))
+                // Prioridad 3: enlace de fotos del producto/emprendimiento
+                if (!string.IsNullOrWhiteSpace(item.EnlaceDriveFotos))
                     item.ImagenPortadaUrl = ConvertirUrlDrive(item.EnlaceDriveFotos);
             }
         }
@@ -102,7 +114,12 @@ namespace VisionNaranja.Services
                 .OrderBy(v => v.NombreEmprendimiento)
                 .ToListAsync();
 
-            if (items.Count == 0)
+            bool hayFiltrosActivos = !string.IsNullOrWhiteSpace(categoria)
+                || ciudadId.HasValue
+                || !string.IsNullOrWhiteSpace(tipoOferta)
+                || !string.IsNullOrWhiteSpace(termino);
+
+            if (items.Count == 0 && !hayFiltrosActivos)
             {
                 var emprendimientos = await _context.Emprendimientos
                     .Where(e => e.Activo)

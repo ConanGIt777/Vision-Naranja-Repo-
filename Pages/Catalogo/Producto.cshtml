@@ -1,0 +1,277 @@
+@page "{id:int}"
+@model VisionNaranja.Pages.Catalogo.ProductoModel
+@{
+    ViewData["Title"] = Model.Producto?.Nombre ?? "Producto";
+}
+
+@if (Model.Producto is null)
+{
+    <div class="container text-center py-5">
+        <p>No se encontró el producto solicitado.</p>
+        <a asp-page="/Catalogo/Index" class="btn-naranja">Volver al catálogo</a>
+    </div>
+}
+else
+{
+    var p = Model.Producto;
+    var e = p.Emprendimiento;
+    var esProducto = p.TipoOferta == 2;
+
+    <section class="detalle-wrapper">
+        <div class="container">
+            <div class="row g-4">
+                <!-- ===== COLUMNA IZQUIERDA: PRODUCTO ===== -->
+                <div class="col-12 col-lg-7">
+                    <div class="producto-detalle-card">
+                        <div class="producto-detalle-imagen" id="galeriaProducto">
+                            @if (Model.ImagenesProducto.Count > 1)
+                            {
+                                <!-- Carrusel de múltiples imágenes -->
+                                <div class="carrusel-imagenes">
+                                    <div class="carrusel-imagenes-track" id="carruselTrack" style="transform: translateX(0%);">
+                                        @foreach (var imagen in Model.ImagenesProducto)
+                                        {
+                                            <img src="@imagen" alt="@p.Nombre" />
+                                        }
+                                    </div>
+                                    
+                                    <!-- Flechas de navegación -->
+                                    <button class="carrusel-flecha-imagen carrusel-flecha-izq-imagen" id="btnCarruselIzq" aria-label="Imagen anterior">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+                                    <button class="carrusel-flecha-imagen carrusel-flecha-der-imagen" id="btnCarruselDer" aria-label="Imagen siguiente">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+                                    
+                                    <!-- Indicadores -->
+                                    <div class="carrusel-indicadores" id="carruselIndicadores">
+                                        @for (int i = 0; i < Model.ImagenesProducto.Count; i++)
+                                        {
+                                            <div class="carrusel-indicador @(i == 0 ? "activo" : "")" data-index="@i"></div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(Model.ImagenUrl))
+                            {
+                                <!-- Imagen única -->
+                                <img src="@Model.ImagenUrl" alt="@p.Nombre" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-image"></i>
+                            }
+
+                            <span class="badge-flotante badge-tipo-flotante">
+                                @(esProducto ? "Producto" : "Servicio")
+                            </span>
+                        </div>
+
+                        <div class="producto-detalle-info">
+                            <p class="producto-detalle-categoria">
+                                <i class="bi bi-tag"></i> @p.Categoria.Nombre
+                            </p>
+                            <h1 class="producto-detalle-titulo">@p.Nombre</h1>
+
+                            @if (p.Precio.HasValue)
+                            {
+                                <p class="producto-detalle-precio">@p.Precio.Value.ToString("C")</p>
+                            }
+                            else
+                            {
+                                <p class="producto-detalle-precio producto-detalle-sin-precio">Sin precio</p>
+                            }
+
+                            @if (!p.Disponible)
+                            {
+                                <span class="badge-no-disponible">No disponible por el momento</span>
+                            }
+
+                            <hr class="sidebar-divider" />
+
+                            <h2 class="detalle-subtitulo-chico">Descripción</h2>
+                            <p class="producto-detalle-descripcion">
+                                @(string.IsNullOrWhiteSpace(p.Descripcion) ? "Este producto aún no tiene una descripción." : p.Descripcion)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ===== CALIFICACIÓN Y COMENTARIOS ===== -->
+                    <div class="resenas-card">
+                        <h2 class="detalle-subtitulo">Calificación y comentarios</h2>
+
+                        <div class="rating-widget" id="ratingWidget" data-rating="0">
+                            <div class="rating-estrellas" id="ratingEstrellas">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi bi-star rating-estrella" data-valor="@i"></i>
+                                }
+                            </div>
+                            <span class="rating-texto" id="ratingTexto">Toca una estrella para calificar</span>
+                        </div>
+
+                        <form id="comentarioForm" class="comentario-form">
+                            <label class="filtro-label" for="comentarioTexto">Tu comentario</label>
+                            <textarea id="comentarioTexto" class="comentario-textarea" rows="3"
+                                      placeholder="Cuéntanos qué te pareció este producto o servicio..." maxlength="500"></textarea>
+                            <button type="submit" class="btn-naranja btn-publicar-comentario">
+                                <i class="bi bi-send"></i> Publicar comentario
+                            </button>
+                        </form>
+
+                        <p class="resenas-nota">
+                            <i class="bi bi-info-circle"></i>
+                            Las calificaciones y comentarios son una vista previa: por ahora solo se muestran en tu navegador y no se guardan permanentemente.
+                        </p>
+
+                        <ul class="comentarios-lista" id="comentariosLista"></ul>
+                    </div>
+                </div>
+
+                <!-- ===== COLUMNA DERECHA: EMPRENDIMIENTO ===== -->
+                <div class="col-12 col-lg-5">
+                    <div class="detalle-sidebar">
+                        <h4 class="sidebar-titulo">Ofrecido por</h4>
+                        <div class="emprendedor-info">
+                            <div class="emprendedor-avatar">
+                                @if (e.Logo != null)
+                                {
+                                    <img src="/Media/Emprendimiento/@e.EmprendimientoId" alt="@e.NombreMarca" />
+                                }
+                                else
+                                {
+                                    @e.NombreMarca.Substring(0, 1).ToUpper()
+                                }
+                            </div>
+                            <p class="emprendedor-texto">
+                                <strong>@e.NombreMarca</strong><br />
+                                <i class="bi bi-geo-alt"></i> @e.Ciudad?.Nombre
+                            </p>
+                        </div>
+
+                        <hr class="sidebar-divider" />
+
+                        <a class="btn-naranja btn-ver-emprendimiento" asp-page="/Catalogo/Detalle" asp-route-id="@e.EmprendimientoId">
+                            <i class="bi bi-shop"></i> Ver emprendimiento
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <p class="volver-catalogo">
+                <a asp-page="/Catalogo/Index"><i class="bi bi-arrow-left"></i> Volver al catálogo</a>
+            </p>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script>
+        // ===== CARRUSEL DE IMÁGENES =====
+        (function () {
+            const carruselTrack = document.getElementById('carruselTrack');
+            const btnIzq = document.getElementById('btnCarruselIzq');
+            const btnDer = document.getElementById('btnCarruselDer');
+            const indicadores = document.querySelectorAll('.carrusel-indicador');
+            
+            if (!carruselTrack || indicadores.length === 0) return;
+            
+            let indiceActual = 0;
+            const totalImagenes = indicadores.length;
+            
+            function actualizarCarrusel() {
+                const offset = indiceActual * -100;
+                carruselTrack.style.transform = `translateX(${offset}%)`;
+                
+                indicadores.forEach((ind, i) => {
+                    ind.classList.toggle('activo', i === indiceActual);
+                });
+            }
+            
+            function irAPrevious() {
+                indiceActual = (indiceActual - 1 + totalImagenes) % totalImagenes;
+                actualizarCarrusel();
+            }
+            
+            function irASiguiente() {
+                indiceActual = (indiceActual + 1) % totalImagenes;
+                actualizarCarrusel();
+            }
+            
+            btnIzq?.addEventListener('click', irAPrevious);
+            btnDer?.addEventListener('click', irASiguiente);
+            
+            indicadores.forEach((ind, i) => {
+                ind.addEventListener('click', () => {
+                    indiceActual = i;
+                    actualizarCarrusel();
+                });
+            });
+            
+            // Teclado: flechas izquierda/derecha
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') irAPrevious();
+                if (e.key === 'ArrowRight') irASiguiente();
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const estrellas = document.querySelectorAll('#ratingEstrellas .rating-estrella');
+            const ratingTexto = document.getElementById('ratingTexto');
+            const widget = document.getElementById('ratingWidget');
+            const etiquetas = ['Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'];
+
+            function pintarEstrellas(valor) {
+                estrellas.forEach((estrella, i) => {
+                    estrella.classList.toggle('bi-star-fill', i < valor);
+                    estrella.classList.toggle('bi-star', i >= valor);
+                });
+            }
+
+            estrellas.forEach((estrella) => {
+                estrella.addEventListener('mouseenter', () => {
+                    pintarEstrellas(parseInt(estrella.dataset.valor, 10));
+                });
+                estrella.addEventListener('click', () => {
+                    const valor = parseInt(estrella.dataset.valor, 10);
+                    widget.dataset.rating = valor;
+                    pintarEstrellas(valor);
+                    ratingTexto.textContent = `Tu calificación: ${valor} / 5 (${etiquetas[valor - 1]})`;
+                });
+            });
+
+            widget.addEventListener('mouseleave', () => {
+                pintarEstrellas(parseInt(widget.dataset.rating, 10));
+            });
+
+            const form = document.getElementById('comentarioForm');
+            const textarea = document.getElementById('comentarioTexto');
+            const lista = document.getElementById('comentariosLista');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const texto = textarea.value.trim();
+                if (!texto) return;
+
+                const valor = parseInt(widget.dataset.rating, 10) || 0;
+                const li = document.createElement('li');
+                li.className = 'comentario-item';
+
+                const estrellasTexto = valor > 0
+                    ? '★'.repeat(valor) + '☆'.repeat(5 - valor)
+                    : 'Sin calificación';
+
+                li.innerHTML = `
+                    <div class="comentario-estrellas">${estrellasTexto}</div>
+                    <p class="comentario-texto"></p>
+                `;
+                li.querySelector('.comentario-texto').textContent = texto;
+
+                lista.prepend(li);
+                textarea.value = '';
+            });
+        })();
+    </script>
+}

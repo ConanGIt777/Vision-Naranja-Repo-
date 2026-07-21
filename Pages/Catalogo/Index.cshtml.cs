@@ -48,8 +48,7 @@ namespace VisionNaranja.Pages.Catalogo
             Items = await _catalogoService.ObtenerCatalogoAsync(
                 Categoria, CiudadId, TipoOferta, Termino);
 
-            var catalogo = Items;
-            Destacados = catalogo
+            Destacados = Items
                 .GroupBy(v => v.EmprendimientoId)
                 .Select(g => g.First())
                 .OrderByDescending(v => v.FechaRegistro)

@@ -63,36 +63,42 @@ else
                         <div class="row g-4">
                             @foreach (var p in e.Productos)
                             {
-                                <div class="col-12 col-sm-6">
-                                    <div class="producto-card">
-                                        <div class="producto-imagen-placeholder">
-                                            @if (!string.IsNullOrEmpty(p.ImagenPortadaUrl))
-                                            {
-                                                <img src="@p.ImagenPortadaUrl" alt="@p.Nombre" />
-                                            }
-                                            else
-                                            {
-                                                <i class="bi bi-image"></i>
-                                            }
+                                <div class="col-12 col-sm-6 col-lg-4">
+                                    <a class="card-emprendimiento-link" asp-page="/Catalogo/Producto" asp-route-id="@p.ProductoServicioId">
+                                        <div class="producto-card">
+                                            <div class="producto-imagen-placeholder">
+                                                @if (!string.IsNullOrEmpty(p.ImagenPortadaUrl))
+                                                {
+                                                    <img src="@p.ImagenPortadaUrl" alt="@p.Nombre" />
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-image"></i>
+                                                }
+                                            </div>
+                                            <div class="producto-info">
+                                                <h3 class="producto-nombre">@p.Nombre</h3>
+                                                @if (!string.IsNullOrWhiteSpace(e.TiempoDeEntrega))
+                                                {
+                                                    <p class="producto-tiempo">
+                                                        <i class="bi bi-clock"></i> @e.TiempoDeEntrega
+                                                    </p>
+                                                }
+                                                @if (p.Precio.HasValue)
+                                                {
+                                                    <p class="producto-precio">@p.Precio.Value.ToString("C")</p>
+                                                }
+                                                else
+                                                {
+                                                    <p class="producto-precio producto-detalle-sin-precio">Sin precio</p>
+                                                }
+                                                @if (!p.Disponible)
+                                                {
+                                                    <span class="badge-no-disponible">No disponible</span>
+                                                }
+                                            </div>
                                         </div>
-                                        <div class="producto-info">
-                                            <h3 class="producto-nombre">@p.Nombre</h3>
-                                            @if (!string.IsNullOrWhiteSpace(e.TiempoDeEntrega))
-                                            {
-                                                <p class="producto-tiempo">
-                                                    <i class="bi bi-clock"></i> @e.TiempoDeEntrega
-                                                </p>
-                                            }
-                                            @if (p.Precio.HasValue)
-                                            {
-                                                <p class="producto-precio">@p.Precio.Value.ToString("C")</p>
-                                            }
-                                            @if (!p.Disponible)
-                                            {
-                                                <span class="badge-no-disponible">No disponible</span>
-                                            }
-                                        </div>
-                                    </div>
+                                    </a>
                                 </div>
                             }
                         </div>

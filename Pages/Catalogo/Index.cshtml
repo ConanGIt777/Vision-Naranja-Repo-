@@ -36,7 +36,7 @@
             <div>
                 <h2 class="resultados-titulo">Catálogo de Productos</h2>
                 <p class="resultados-count">
-                    Mostrando <strong>@Model.Items.Count</strong> emprendimiento(s)
+                    Mostrando <strong>@Model.Items.Count</strong> producto(s)/servicio(s)
                 </p>
             </div>
 
@@ -93,7 +93,12 @@
                 @foreach (var item in Model.Items)
                 {
                     <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                        <a class="card-emprendimiento-link" asp-page="/Catalogo/Detalle" asp-route-id="@item.EmprendimientoId">
+                        @{
+                            var esProductoIndividual = item.ProductoServicioId > 0;
+                            var rutaTarjeta = esProductoIndividual ? "/Catalogo/Producto" : "/Catalogo/Detalle";
+                            var idTarjeta = esProductoIndividual ? item.ProductoServicioId : item.EmprendimientoId;
+                        }
+                        <a class="card-emprendimiento-link" asp-page="@rutaTarjeta" asp-route-id="@idTarjeta">
                             <div class="card-emprendimiento h-100">
                                 <div class="card-imagen">
                                     @if (!string.IsNullOrEmpty(item.ImagenPortadaUrl))
@@ -118,7 +123,7 @@
                                 </div>
 
                                 <div class="card-emprendimiento-body">
-                                    <h3 class="card-emprendimiento-titulo">@item.NombreEmprendimiento</h3>
+                                    <h3 class="card-emprendimiento-titulo">@item.NombreProductoServicio</h3>
                                     <p class="card-emprendimiento-desc">
                                         @(item.Descripcion?.Length > 90 ? item.Descripcion.Substring(0, 90) + "..." : item.Descripcion)
                                     </p>
@@ -126,7 +131,7 @@
                                     <hr class="card-divider" />
 
                                     <p class="card-contacto">
-                                        <i class="bi bi-envelope"></i> @item.CorreoElectronico
+                                        <i class="bi bi-shop"></i> @item.NombreEmprendimiento
                                     </p>
                                     <p class="card-contacto card-contacto-secundario">
                                         <i class="bi bi-geo-alt"></i> @item.Ciudad
